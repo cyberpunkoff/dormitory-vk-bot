@@ -8,7 +8,6 @@
 - `Spring Core 6`
 - `Spring Boot 3`
 - `Spring Data JPA 3`
-- `Spring Security 6`
 - `PostgreSQL 16`
 ### Запуск приложения▶️
 Для запуска приложения перейдите по [ссылке](https://vk.com) и напишите команду `/start`.
