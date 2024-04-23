@@ -4,16 +4,15 @@ import api.longpoll.bots.LongPollBot;
 import api.longpoll.bots.exceptions.VkApiException;
 import api.longpoll.bots.methods.VkBotsMethods;
 import api.longpoll.bots.model.events.Update;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.mirea.edu.dormitorybot.configuration.ApplicationConfig;
+import ru.mirea.edu.dormitorybot.configuration.MinioProperties;
 import ru.mirea.edu.dormitorybot.handlers.EchoHandler;
 import ru.mirea.edu.dormitorybot.handlers.KeyboardDemo;
 
-import java.security.Key;
 import java.util.List;
 
 @Component
