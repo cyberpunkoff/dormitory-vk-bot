@@ -39,15 +39,15 @@ public class StateMachineHandler implements UpdateHandler {
             log.info("Unable to restore state machine for user {}. Creating new state machine.",
                     message.getFromId());
             stateMachine = stateMachineFactory.getStateMachine();
-            stateMachine.getExtendedState().getVariables().put("message", message);
         }
 
+        stateMachine.getExtendedState().getVariables().put("message", message);
+
         try {
-//            stateMachine.getState().getId().getStateHandler().handle(stateMachine, message);
             Event event = Event.getEvent(message);
+            log.info("Sending event {} to state machine", event);
             stateMachine.sendEvent(Mono.just(MessageBuilder.withPayload(event).build())).subscribe();
             persister.persist(stateMachine, message.getFromId());
-            stateMachine.getState().getId().getStateHandler().sendMessage(message.getFromId());
         } catch (Exception e) {
             log.error("Exception during execution {}", e.toString());
         }

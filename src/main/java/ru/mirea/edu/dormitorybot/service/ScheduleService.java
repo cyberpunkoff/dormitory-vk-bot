@@ -5,11 +5,9 @@ import api.longpoll.bots.model.objects.basic.Message;
 import api.longpoll.bots.model.objects.media.Photo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
+import ru.mirea.edu.dormitorybot.service.minio.ScheduleImageService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
-import ru.mirea.edu.dormitorybot.statemachine.State;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +33,7 @@ public class ScheduleService {
     public void updateSchedule(Integer id, String photoUrl) {
         try (InputStream photoStream = URI.create(photoUrl).toURL().openStream()) {
             scheduleService.updateSchedule(photoStream);
-            vkBotService.sendTextMessage(id, "Расписание обновлено!");
+            vkBotService.sendTextMessageWithKeyboard(id, "Расписание обновлено!", HelperService.MENU_KEYBOARD);
         } catch (IOException e) {
             log.error("Error updating photo! {}", e.getMessage());
         }
@@ -48,7 +46,7 @@ public class ScheduleService {
 
     public static String getPhotoUrlFromMessage(Message message) {
         Photo photo = message.getAttachments().getFirst().getPhoto();
-        return photo.getPhotoSizes().getFirst().getSrc();
+        return photo.getPhotoSizes().getLast().getSrc();
     }
 
     public static boolean checkMessageHasPhotoAttachment(Message message) {

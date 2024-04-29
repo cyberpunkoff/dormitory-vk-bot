@@ -16,6 +16,7 @@ public enum Event {
     UNKNOWN_TEXT_RECEIVED,
     GET_EMPLOYEE("Сотрудники"),
     CREATE_NEWSLETTER("Создать рассылку"),
+    BACK("Назад"),
     EDIT_NEWSLETTER("Редактировать");
 
     private final static Map<String, Event> messageToEvent = new HashMap<>();
@@ -30,13 +31,11 @@ public enum Event {
     }
 
     public static Event getEvent(Message message) {
-        Event event = messageToEvent.get(message.getText());
+        Event event = messageToEvent.getOrDefault(message.getText(), Event.UNKNOWN_TEXT_RECEIVED);
 
         if (ScheduleService.checkMessageHasPhotoAttachment(message)) {
             event = Event.PHOTO_RECEIVED;
         }
-
-        event = Event.UNKNOWN_TEXT_RECEIVED;
 
         return event;
     }

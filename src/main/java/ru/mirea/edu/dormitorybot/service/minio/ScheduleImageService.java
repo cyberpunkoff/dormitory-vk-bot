@@ -1,4 +1,4 @@
-package ru.mirea.edu.dormitorybot.service;
+package ru.mirea.edu.dormitorybot.service.minio;
 
 import ru.mirea.edu.dormitorybot.exceptions.NoScheduleForCurrentMonthException;
 

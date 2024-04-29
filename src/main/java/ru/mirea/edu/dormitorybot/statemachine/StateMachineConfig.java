@@ -11,9 +11,9 @@ import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import ru.mirea.edu.dormitorybot.service.EmployeeInfoService;
 import ru.mirea.edu.dormitorybot.service.HelperService;
 import ru.mirea.edu.dormitorybot.service.ScheduleService;
-import ru.mirea.edu.dormitorybot.statemachine.states.MenuStateHandler;
 
 import java.util.EnumSet;
 
@@ -22,10 +22,9 @@ import java.util.EnumSet;
 @RequiredArgsConstructor
 @EnableStateMachineFactory
 public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State, Event> {
-    private final MenuStateHandler menuStateHandler;
     private final ScheduleService scheduleService;
     private final HelperService helperService;
-
+    private final EmployeeInfoService employeeInfoService;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<State, Event> config) throws Exception {
@@ -43,6 +42,30 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     public void configure(StateMachineTransitionConfigurer<State, Event> transitions) throws Exception {
         transitions.withExternal()
                 .source(State.MAIN_MENU)
+                .target(State.CHOOSE_EMPLOYEE)
+                .event(Event.GET_EMPLOYEE)
+                .action(sendEmployeesAction())
+                .and()
+                .withExternal()
+                .source(State.CHOOSE_EMPLOYEE)
+                .target(State.CHOOSE_EMPLOYEE)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(sendEmployeeInfoAction())
+                .and()
+                .withExternal()
+                .source(State.MAIN_MENU)
+                .target(State.MAIN_MENU)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(sendMenuAction())
+                .and()
+                .withExternal()
+                .source(State.CHOOSE_EMPLOYEE)
+                .target(State.MAIN_MENU)
+                .event(Event.BACK)
+                .action(sendMenuAction())
+                .and()
+                .withExternal()
+                .source(State.MAIN_MENU)
                 .target(State.SEND_SCHEDULE_PHOTO)
                 .event(Event.UPDATE_SCHEDULE)
                 .action(askForPhotoAction())
@@ -58,6 +81,12 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .target(State.APPROVE_SCHEDULE_UPDATE)
                 .event(Event.PHOTO_RECEIVED)
                 .action(photoReceivedAction())
+                .and()
+                .withExternal()
+                .source(State.SEND_SCHEDULE_PHOTO)
+                .target(State.MAIN_MENU)
+                .event(Event.CANCEL)
+                .action(cancelAction())
                 .and()
                 .withExternal()
                 .source(State.SEND_SCHEDULE_PHOTO)
@@ -78,11 +107,36 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     }
 
     @Bean
+    Action<State, Event> sendMenuAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            helperService.sendMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendEmployeesAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            employeeInfoService.sendEmployees(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendEmployeeInfoAction() {
+        return context -> {
+            Message message = context.getExtendedState().get("message", Message.class);
+            Integer userId = message.getFromId();
+            employeeInfoService.sendInfoAboutEmployee(userId, message.getText());
+        };
+    }
+
+    @Bean
     Action<State, Event> sendScheduleAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
             log.info("Sending schedule to {}", userId);
-            menuStateHandler.sendSchedule(userId);
+            scheduleService.sendSchedule(userId);
         };
     }
 

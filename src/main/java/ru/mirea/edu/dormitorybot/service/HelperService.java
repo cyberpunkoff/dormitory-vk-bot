@@ -12,10 +12,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HelperService {
-    private final static Keyboard MENU_KEYBOARD = VkBotService.createKeyboard(
+    public final static Keyboard MENU_KEYBOARD = VkBotService.createKeyboard(
             List.of(GET_SCHEDULE.toString(), GET_EMPLOYEE.toString(), UPDATE_SCHEDULE.toString())
     );
     private final VkBotService vkBotService;
+
+    public void sendMenu(Integer id) {
+        vkBotService.sendTextMessageWithKeyboard(id, "Добро пожаловать во второе общежитие!", MENU_KEYBOARD);
+    }
 
     public void askForConfirmation(Integer id) {
         Keyboard keyboard = VkBotService.createKeyboard(List.of(Event.APPROVE.toString(), Event.CANCEL.toString()));
