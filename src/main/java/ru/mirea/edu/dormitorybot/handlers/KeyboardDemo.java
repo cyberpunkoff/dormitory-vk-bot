@@ -5,24 +5,29 @@ import api.longpoll.bots.methods.VkBotsMethods;
 import api.longpoll.bots.model.events.Update;
 import api.longpoll.bots.model.events.messages.MessageNew;
 import api.longpoll.bots.model.objects.additional.Keyboard;
+import api.longpoll.bots.model.objects.additional.PhotoSize;
 import api.longpoll.bots.model.objects.additional.buttons.Button;
 import api.longpoll.bots.model.objects.additional.buttons.TextButton;
 import api.longpoll.bots.model.objects.basic.Message;
-import api.longpoll.bots.model.objects.media.AttachedLink;
+import api.longpoll.bots.model.objects.media.Attachment;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
+import ru.mirea.edu.dormitorybot.exceptions.NoScheduleForCurrentMonthException;
+import ru.mirea.edu.dormitorybot.service.ScheduleService;
 
-import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Component
 @RequiredArgsConstructor
 public class KeyboardDemo implements UpdateHandler {
     private final VkBotsMethods vk;
+    private final ScheduleService scheduleService;
 
     @Override
+    @SneakyThrows
     public void handle(Update update) throws VkApiException {
         if (update.getType() != Update.Type.MESSAGE_NEW) {
             return;
@@ -36,26 +41,22 @@ public class KeyboardDemo implements UpdateHandler {
                 List.of(new TextButton(Button.Color.NEGATIVE, new TextButton.Action("Админ-панель")))
         );
 
-        if (message.getText().equals("Расписание смены белья")) {
-            File file = new File("5zeiHGHbAoY.jpg");
-            vk.messages.send()
-                    .setPeerIds(message.getPeerId())
-                    .setMessage("Расписание на текущий месяц")
-                    .addPhoto(file)
-                    .execute();
-        }
-
         Keyboard keyboard = new Keyboard(buttons).setOneTime(true);
 
-
         if (message.getText().equals("Расписание смены белья")) {
-            File file = new File("5zeiHGHbAoY.jpg");
-            vk.messages.send()
-                    .setPeerIds(message.getPeerId())
-                    .setMessage("Расписание на текущий месяц")
-                    .addPhoto(file)
-                    .execute();
-            return;
+            try {
+                InputStream schedulePhotoStream = scheduleService.getSchedule();
+                vk.messages.send()
+                        .setPeerIds(message.getPeerId())
+                        .setMessage("Расписание на текущий месяц")
+                        .addPhoto("schedule.jpg", schedulePhotoStream)
+                        .execute();
+            } catch (NoScheduleForCurrentMonthException ignored) {
+                vk.messages.send()
+                        .setPeerIds(message.getPeerId())
+                        .setMessage("Извините, расписание ещё не обновлено")
+                        .execute();
+            }
         }
 
         if (message.getText().equals("Админ-панель")) {
@@ -74,6 +75,17 @@ public class KeyboardDemo implements UpdateHandler {
             return;
         }
 
+        if (message.getText().equals("Обновить расписание")) {
+            InputStream photoStream = null;
+            var attachments = message.getAttachments();
+            for (Attachment attachment : attachments) {
+                PhotoSize lastPhoto = attachment.getPhoto().getPhotoSizes().get(attachment.getPhoto().getPhotoSizes().size() - 1);
+                String photoUrl = lastPhoto.getSrc();
+                photoStream = URI.create(photoUrl).toURL().openStream();
+            }
+           scheduleService.updateSchedule(photoStream);
+            return;
+        }
 
         vk.messages.send()
                 .setPeerIds(message.getPeerId())

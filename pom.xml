@@ -23,6 +23,7 @@
         <spring-boot.version>3.2.2</spring-boot.version>
 
         <java-vk-bot-api.version>4.1.8</java-vk-bot-api.version>
+        <minio.version>8.5.9</minio.version>
 
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
@@ -53,6 +54,13 @@
             <groupId>com.github.yvasyliev</groupId>
             <artifactId>java-vk-bots-longpoll-api</artifactId>
             <version>${java-vk-bot-api.version}</version>
+        </dependency>
+
+        <!-- Minio -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
         </dependency>
 
 
