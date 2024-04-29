@@ -13,6 +13,7 @@ import api.longpoll.bots.model.objects.media.Attachment;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
+import ru.mirea.edu.dormitorybot.exceptions.NoScheduleForCurrentMonthException;
 import ru.mirea.edu.dormitorybot.service.ScheduleService;
 
 import java.io.InputStream;
@@ -43,20 +44,19 @@ public class KeyboardDemo implements UpdateHandler {
         Keyboard keyboard = new Keyboard(buttons).setOneTime(true);
 
         if (message.getText().equals("Расписание смены белья")) {
-            InputStream stream = scheduleService.getSchedule();
-            if (scheduleService.isActual()) {
+            try {
+                InputStream schedulePhotoStream = scheduleService.getSchedule();
+                vk.messages.send()
+                        .setPeerIds(message.getPeerId())
+                        .setMessage("Расписание на текущий месяц")
+                        .addPhoto("schedule.jpg", schedulePhotoStream)
+                        .execute();
+            } catch (NoScheduleForCurrentMonthException ignored) {
                 vk.messages.send()
                         .setPeerIds(message.getPeerId())
                         .setMessage("Извините, расписание ещё не обновлено")
                         .execute();
-                return;
             }
-            vk.messages.send()
-                    .setPeerIds(message.getPeerId())
-                    .setMessage("Расписание на текущий месяц")
-                    .addPhoto("schedule.jpg", stream)
-                    .execute();
-            return;
         }
 
         if (message.getText().equals("Админ-панель")) {
@@ -83,7 +83,7 @@ public class KeyboardDemo implements UpdateHandler {
                 String photoUrl = lastPhoto.getSrc();
                 photoStream = URI.create(photoUrl).toURL().openStream();
             }
-           scheduleService.putFile(photoStream);
+           scheduleService.updateSchedule(photoStream);
             return;
         }
 
