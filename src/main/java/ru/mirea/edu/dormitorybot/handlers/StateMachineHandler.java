@@ -9,10 +9,13 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.StateMachineEventResult;
+import static org.springframework.statemachine.StateMachineEventResult.ResultType.ACCEPTED;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.persist.StateMachinePersister;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import ru.mirea.edu.dormitorybot.service.VkBotService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
 import ru.mirea.edu.dormitorybot.statemachine.State;
 
@@ -22,6 +25,7 @@ import ru.mirea.edu.dormitorybot.statemachine.State;
 public class StateMachineHandler implements UpdateHandler {
     private final StateMachineFactory<State, Event> stateMachineFactory;
     private final StateMachinePersister<State, Event, Integer> persister;
+    private final VkBotService vkBotService;
 
     @Override
     public void handle(Update update) throws VkApiException {
@@ -41,12 +45,17 @@ public class StateMachineHandler implements UpdateHandler {
             stateMachine = stateMachineFactory.getStateMachine();
         }
 
+
         stateMachine.getExtendedState().getVariables().put("message", message);
 
         try {
             Event event = Event.getEvent(message);
             log.info("Sending event {} to state machine", event);
-            stateMachine.sendEvent(Mono.just(MessageBuilder.withPayload(event).build())).subscribe();
+            var result = stateMachine.sendEvent(Mono.just(MessageBuilder.withPayload(event).build()))
+                    .collectList().block().getFirst().getResultType();
+            if (result != ACCEPTED) {
+                vkBotService.sendTextMessage(message.getFromId(), "Vi dodik?");
+            }
             persister.persist(stateMachine, message.getFromId());
         } catch (Exception e) {
             log.error("Exception during execution {}", e.toString());
