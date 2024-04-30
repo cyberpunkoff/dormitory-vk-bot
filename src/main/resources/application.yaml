@@ -6,5 +6,5 @@ app:
 minio:
   bucket: schedule
   url: http://localhost:9000
-  access_key: minioadmin
-  secret_key: minioadmin
+  access_key: minio99
+  secret_key: minio123

@@ -4,6 +4,7 @@ import api.longpoll.bots.LongPollBot;
 import api.longpoll.bots.exceptions.VkApiException;
 import api.longpoll.bots.methods.VkBotsMethods;
 import api.longpoll.bots.model.events.Update;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
@@ -12,6 +13,7 @@ import ru.mirea.edu.dormitorybot.configuration.ApplicationConfig;
 import ru.mirea.edu.dormitorybot.configuration.MinioProperties;
 import ru.mirea.edu.dormitorybot.handlers.EchoHandler;
 import ru.mirea.edu.dormitorybot.handlers.KeyboardDemo;
+import ru.mirea.edu.dormitorybot.handlers.StateMachineHandler;
 
 import java.util.List;
 
@@ -21,11 +23,13 @@ public class VkBot extends LongPollBot implements AutoCloseable {
     private final ApplicationConfig applicationConfig;
     private final EchoHandler handler;
     private final KeyboardDemo keyboardDemo;
+    private final StateMachineHandler stateMachineHandler;
 
-    public VkBot(ApplicationConfig applicationConfig, @Lazy EchoHandler handler, @Lazy KeyboardDemo keyboardDemo) {
+    public VkBot(ApplicationConfig applicationConfig, @Lazy EchoHandler handler, @Lazy KeyboardDemo keyboardDemo, @Lazy StateMachineHandler stateMachineHandler) {
         this.applicationConfig = applicationConfig;
         this.handler = handler;
         this.keyboardDemo = keyboardDemo;
+        this.stateMachineHandler = stateMachineHandler;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class VkBot extends LongPollBot implements AutoCloseable {
         updates.forEach(update -> {
             log.info("Got new update {}", update);
             try {
-                keyboardDemo.handle(update);
+                stateMachineHandler.handle(update);
             } catch (VkApiException e) {
                 throw new RuntimeException(e);
             }

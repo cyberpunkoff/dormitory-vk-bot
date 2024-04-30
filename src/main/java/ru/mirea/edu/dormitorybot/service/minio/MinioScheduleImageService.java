@@ -1,4 +1,4 @@
-package ru.mirea.edu.dormitorybot.service;
+package ru.mirea.edu.dormitorybot.service.minio;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,10 +10,10 @@ import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class MinioScheduleService implements ScheduleService {
+public class MinioScheduleImageService implements ScheduleImageService {
     // @Value("${app.bucket}") Зачем тут эти штуки? У нас же это будет супер статичная тема, думаю можно просто статиками
     private final static String SCHEDULE_BUCKET = "schedule";
-    private final static String SCHEDULE_PICTURE = "schedule_picture";
+    private final static String SCHEDULE_PICTURE = "schedule-picture";
     private final MinioService minioService;
 
     @Override
