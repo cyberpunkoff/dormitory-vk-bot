@@ -43,6 +43,15 @@ public class VkBotService {
                 .execute();
     }
 
+    @SneakyThrows
+    public void sendTextWithDocument(Integer id, String text, InputStream doc) {
+        vk.messages.send()
+                .setPeerIds(id)
+                .setMessage(text)
+                .addDoc("rules.pdf", doc)
+                .execute();
+    }
+
     public static Keyboard createKeyboard(List<String> labels) {
         List<List<Button>> buttons = new ArrayList<>();
         labels.forEach(label ->

@@ -13,6 +13,7 @@ import org.springframework.statemachine.config.builders.StateMachineStateConfigu
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 import ru.mirea.edu.dormitorybot.service.EmployeeInfoService;
 import ru.mirea.edu.dormitorybot.service.HelperService;
+import ru.mirea.edu.dormitorybot.service.RulesService;
 import ru.mirea.edu.dormitorybot.service.ScheduleService;
 
 import java.util.EnumSet;
@@ -25,6 +26,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     private final ScheduleService scheduleService;
     private final HelperService helperService;
     private final EmployeeInfoService employeeInfoService;
+    private final RulesService rulesService;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<State, Event> config) throws Exception {
@@ -50,6 +52,11 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .source(State.CHOOSE_EMPLOYEE).target(State.CHOOSE_EMPLOYEE)
                 .event(Event.UNKNOWN_TEXT_RECEIVED)
                 .action(sendEmployeeInfoAction())
+                .and()
+                .withExternal()
+                .source(State.MAIN_MENU).target(State.MAIN_MENU)
+                .event(Event.GET_RULES)
+                .action(sendRulesAction())
                 .and()
                 .withExternal()
                 .source(State.MAIN_MENU).target(State.MAIN_MENU)
@@ -166,6 +173,14 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
             Message message = context.getExtendedState().get("message", Message.class);
             Integer userId = message.getFromId();
             helperService.sendActionCanceledMessage(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendRulesAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            rulesService.sendRules(userId);
         };
     }
 }

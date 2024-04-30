@@ -17,7 +17,8 @@ public enum Event {
     GET_EMPLOYEE("Сотрудники"),
     CREATE_NEWSLETTER("Создать рассылку"),
     BACK("Назад"),
-    EDIT_NEWSLETTER("Редактировать");
+    EDIT_NEWSLETTER("Редактировать"),
+    GET_RULES("Правила общежития");
 
     private final static Map<String, Event> messageToEvent = new HashMap<>();
     private String messageText;

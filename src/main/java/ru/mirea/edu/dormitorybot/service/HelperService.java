@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HelperService {
     public final static Keyboard MENU_KEYBOARD = VkBotService.createKeyboard(
-            List.of(GET_SCHEDULE.toString(), GET_EMPLOYEE.toString(), UPDATE_SCHEDULE.toString())
+            List.of(GET_SCHEDULE.toString(), GET_RULES.toString(), GET_EMPLOYEE.toString(), UPDATE_SCHEDULE.toString())
     );
     private final VkBotService vkBotService;
 
