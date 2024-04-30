@@ -1,7 +1,21 @@
 app:
-  access-token: ${VK_ACCESS_TOKEN}
+  access-token: vk1.a.fT7f19HLuh_SgADuSM8Cfj_2CUGE3kmENVRbJZZ74EiEl96V-2_LD9aaCIlk4KC9ahO6QkCBG_fi7eiUks6PBJPJH1QUOLvi5XAFy4eOqHLpjgjATt3_xZodbYHJuNgK2YS4QjFuB9gIHa3s539pTOvIkej1QCl8AWU0QiZvG7X7nDcLB9BplJY8YpfcLPrslzZDdisJ_j1kCbBEv7SfMw
   bucket: schedule
   object: schedule.jpg
+
+spring:
+  liquibase:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dormitory
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
 
 minio:
   bucket: schedule
