@@ -18,14 +18,7 @@ import java.util.Optional;
 public class EmployeeInfoService {
     private final VkBotService vkBotService;
     private final EmployeeRepository employeeRepository;
-    //    private final Map<String, Employee> employees = new HashMap<>();
-//
-//    // не круто, что храним вместе сущности и логику
-//    @PostConstruct
-//    private void createEmployees() {
-//        employees.put("MarIO", new Employee("Mario", "Funny computer game hero"));
-//        employees.put("DEAD", new Employee("Dedushka", "old man"));
-//    }
+
     public List<String> getEmployeeNames() {
         return employeeRepository.findAll().stream().map(EmployeeEntity::getEmployeeName).toList();
     }
