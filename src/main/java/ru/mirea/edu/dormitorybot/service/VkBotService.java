@@ -50,4 +50,12 @@ public class VkBotService {
         );
         return new Keyboard(buttons);
     }
+
+    @SneakyThrows
+    public void sendTextMessageForManyUsers(List<Integer> ids, String text) {
+        vk.messages.send()
+                .setPeerIds(ids)
+                .setMessage(text)
+                .execute();
+    }
 }
