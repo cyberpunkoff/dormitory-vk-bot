@@ -9,7 +9,6 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class EmployeeEntity {
     @Id
     @Column(name = "employee_id")
@@ -21,4 +20,9 @@ public class EmployeeEntity {
 
     @Column(name = "description", nullable = false)
     private String description;
+
+    @Override
+    public String toString() {
+        return String.format("%s\n---\n%s", employeeName, description);
+    }
 }
