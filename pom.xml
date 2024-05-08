@@ -6,7 +6,7 @@
 
     <groupId>ru.mirea.edu</groupId>
     <artifactId>dormitory-vk-bot</artifactId>
-    <version>${revision</version>
+    <version>${revision}</version>
 
     <properties>
         <maven.version>3.8.6</maven.version>
@@ -122,6 +122,34 @@
 
     <build>
         <plugins>
+
+            <!-- Spring Boot -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <configuration>
+                    <mainClass>ru.mirea.edu.dormitorybot.DormitoryBotApplication</mainClass>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -136,31 +164,6 @@
 
         <pluginManagement>
             <plugins>
-                <!-- Spring Boot -->
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                    <configuration>
-                        <layers>
-                            <enabled>true</enabled>
-                        </layers>
-                        <excludes>
-                            <exclude>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                            </exclude>
-                        </excludes>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>repackage</goal>
-                                <goal>build-info</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
 
                 <plugin>
                     <groupId>io.github.git-commit-id</groupId>
