@@ -1,7 +1,6 @@
 package ru.mirea.edu.dormitorybot.service.student;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mirea.edu.dormitorybot.dao.entity.Role;

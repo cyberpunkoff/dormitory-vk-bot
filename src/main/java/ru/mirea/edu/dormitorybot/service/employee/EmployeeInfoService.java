@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import ru.mirea.edu.dormitorybot.dto.EmployeeDto;
 import ru.mirea.edu.dormitorybot.exceptions.EmployeeNotFoundException;
 import ru.mirea.edu.dormitorybot.service.VkBotService;
+import ru.mirea.edu.dormitorybot.service.minio.employee.EmployeeImageService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,7 @@ import java.util.List;
 public class EmployeeInfoService {
     private final VkBotService vkBotService;
     private final EmployeeService employeeService;
+    private final EmployeeImageService employeeImageService;
 
     public List<String> getEmployeeNames() {
         return employeeService.getEmployeesNames();
@@ -36,14 +39,19 @@ public class EmployeeInfoService {
     public void sendInfoAboutEmployee(Integer id, String employeeName) {
         try {
             EmployeeDto employeeInfo = employeeService.getEmployeeData(employeeName);
-            vkBotService.sendTextMessage(id, makeInfoMessage(employeeInfo));
+            InputStream inputStream = employeeImageService.getEmployeePicture(employeeInfo.id());
+            vkBotService.sendTextWithImage(
+                    id,
+                    makeInfoMessage(employeeInfo),
+                    inputStream
+            );
         } catch (EmployeeNotFoundException e) {
             vkBotService.sendTextMessage(id, "Такого сотрудника нет в общежитии");
         }
     }
 
     private String makeInfoMessage(EmployeeDto employeeDto) {
-        return "ФИО: %s\nДополнительная информация: %s\nНомер телефона: %s\nПочта:%s"
+        return "ФИО: %s\nДополнительная информация: %s\nНомер телефона: %s\nПочта: %s"
                 .formatted(employeeDto.name(), employeeDto.description(), employeeDto.phone(), employeeDto.email());
     }
 }

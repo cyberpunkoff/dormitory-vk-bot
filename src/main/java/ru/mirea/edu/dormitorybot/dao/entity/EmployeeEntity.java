@@ -30,6 +30,6 @@ public class EmployeeEntity {
     private String email;
 
     public EmployeeDto toDto() {
-        return new EmployeeDto(employeeName, description, phone, email);
+        return new EmployeeDto(employeeId, employeeName, description, phone, email);
     }
 }
