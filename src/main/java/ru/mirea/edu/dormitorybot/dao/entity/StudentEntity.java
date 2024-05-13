@@ -1,9 +1,6 @@
 package ru.mirea.edu.dormitorybot.dao.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,4 +16,7 @@ public class StudentEntity {
     @Id
     @Column(name = "student_id", unique = true, nullable = false)
     private Long studentId;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

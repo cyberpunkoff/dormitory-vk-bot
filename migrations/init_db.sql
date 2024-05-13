@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS student
 (
-    student_id      BIGINT      NOT NULL,
+    student_id      BIGINT          NOT NULL,
+    role            VARCHAR(30),
 
     UNIQUE (student_id),
     PRIMARY KEY (student_id)
