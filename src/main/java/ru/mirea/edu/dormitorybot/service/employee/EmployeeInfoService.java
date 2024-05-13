@@ -1,33 +1,26 @@
-package ru.mirea.edu.dormitorybot.service;
+package ru.mirea.edu.dormitorybot.service.employee;
 
 import api.longpoll.bots.model.objects.additional.Keyboard;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
-import ru.mirea.edu.dormitorybot.dao.entity.EmployeeEntity;
-import ru.mirea.edu.dormitorybot.dao.repository.EmployeeRepository;
+import ru.mirea.edu.dormitorybot.dto.EmployeeDto;
+import ru.mirea.edu.dormitorybot.exceptions.EmployeeNotFoundException;
+import ru.mirea.edu.dormitorybot.service.VkBotService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class EmployeeInfoService {
     private final VkBotService vkBotService;
-    private final EmployeeRepository employeeRepository;
-    //    private final Map<String, Employee> employees = new HashMap<>();
-//
-//    // не круто, что храним вместе сущности и логику
-//    @PostConstruct
-//    private void createEmployees() {
-//        employees.put("MarIO", new Employee("Mario", "Funny computer game hero"));
-//        employees.put("DEAD", new Employee("Dedushka", "old man"));
-//    }
+    private final EmployeeService employeeService;
+
     public List<String> getEmployeeNames() {
-        return employeeRepository.findAll().stream().map(EmployeeEntity::getEmployeeName).toList();
+        return employeeService.getEmployeesNames();
     }
 
     public void sendEmployees(Integer id) {
@@ -41,11 +34,16 @@ public class EmployeeInfoService {
     }
 
     public void sendInfoAboutEmployee(Integer id, String employeeName) {
-        Optional<EmployeeEntity> employee = employeeRepository.findEmployeeEntityByEmployeeName(employeeName);
-        if (employee.isPresent()) {
-            vkBotService.sendTextMessage(id, employee.get().toString());
-        } else {
+        try {
+            EmployeeDto employeeInfo = employeeService.getEmployeeData(employeeName);
+            vkBotService.sendTextMessage(id, makeInfoMessage(employeeInfo));
+        } catch (EmployeeNotFoundException e) {
             vkBotService.sendTextMessage(id, "Такого сотрудника нет в общежитии");
         }
+    }
+
+    private String makeInfoMessage(EmployeeDto employeeDto) {
+        return "ФИО: %s\nДополнительная информация: %s\nНомер телефона: %s\nПочта:%s"
+                .formatted(employeeDto.name(), employeeDto.description(), employeeDto.phone(), employeeDto.email());
     }
 }

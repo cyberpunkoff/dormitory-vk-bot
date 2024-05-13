@@ -8,9 +8,11 @@ CREATE TABLE IF NOT EXISTS student
 
 CREATE TABLE IF NOT EXISTS employee
 (
-    employee_id       BIGINT        GENERATED ALWAYS AS IDENTITY,
-    employee_name     VARCHAR(255)  NOT NULL,
-    description       TEXT          NOT NULL,
+    employee_id         BIGINT          GENERATED ALWAYS AS IDENTITY,
+    employee_name       VARCHAR(255)    NOT NULL,
+    description         TEXT            NOT NULL,
+    phone               VARCHAR(255)    NOT NULL,
+    email               VARCHAR(255)    NOT NULL,
 
     PRIMARY KEY(employee_id)
 );

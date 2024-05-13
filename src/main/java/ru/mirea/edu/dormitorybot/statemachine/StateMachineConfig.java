@@ -11,7 +11,7 @@ import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
-import ru.mirea.edu.dormitorybot.service.EmployeeInfoService;
+import ru.mirea.edu.dormitorybot.service.employee.EmployeeInfoService;
 import ru.mirea.edu.dormitorybot.service.HelperService;
 import ru.mirea.edu.dormitorybot.service.ScheduleService;
 

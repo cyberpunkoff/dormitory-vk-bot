@@ -2,6 +2,7 @@ package ru.mirea.edu.dormitorybot.dao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.mirea.edu.dormitorybot.dto.EmployeeDto;
 
 @Entity
 @Table(name = "employee")
@@ -21,4 +22,14 @@ public class EmployeeEntity {
 
     @Column(name = "description", nullable = false)
     private String description;
+
+    @Column(name = "phone", nullable = false)
+    private String phone;
+
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    public EmployeeDto toDto() {
+        return new EmployeeDto(employeeName, description, phone, email);
+    }
 }
