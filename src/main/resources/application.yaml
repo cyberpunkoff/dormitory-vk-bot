@@ -3,6 +3,20 @@ app:
   bucket: schedule
   object: schedule.jpg
 
+spring:
+  liquibase:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dormitory
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+
 minio:
   bucket: schedule
   url: http://localhost:9000
