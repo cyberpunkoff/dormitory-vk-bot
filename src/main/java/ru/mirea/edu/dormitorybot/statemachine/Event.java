@@ -10,10 +10,12 @@ import java.util.Map;
 public enum Event {
     GET_SCHEDULE("Расписание"),
     UPDATE_SCHEDULE("Обновить расписание"),
+    EDIT_EMPLOYEE_INFO("Обновить информацию о работнике"),
     PHOTO_RECEIVED,
     APPROVE("Подтвердить"),
     CANCEL("Отмена"),
     UNKNOWN_TEXT_RECEIVED,
+    ADMIN_PANEL("Админ-панель"),
     GET_EMPLOYEE("Сотрудники"),
     CREATE_NEWSLETTER("Создать рассылку"),
     BACK("Назад"),
