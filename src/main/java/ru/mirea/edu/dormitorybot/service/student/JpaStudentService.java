@@ -18,8 +18,10 @@ public class JpaStudentService implements StudentService {
     @Override
     @Transactional
     public void addStudent(Long id) {
-        StudentEntity student = new StudentEntity(id, Role.ROLE_USER);
-        studentRepository.save(student);
+        if (studentRepository.findById(id).isEmpty()) {
+            StudentEntity student = new StudentEntity(id, Role.ROLE_USER);
+            studentRepository.save(student);
+        }
     }
 
     @Override

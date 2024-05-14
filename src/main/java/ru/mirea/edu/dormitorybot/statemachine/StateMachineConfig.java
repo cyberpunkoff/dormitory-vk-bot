@@ -5,16 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.guard.Guard;
 import ru.mirea.edu.dormitorybot.service.employee.EmployeeInfoService;
 import ru.mirea.edu.dormitorybot.service.HelperService;
 import ru.mirea.edu.dormitorybot.service.RulesService;
 import ru.mirea.edu.dormitorybot.service.ScheduleService;
+import ru.mirea.edu.dormitorybot.service.student.StudentService;
 
 import java.util.EnumSet;
 
@@ -25,6 +28,7 @@ import java.util.EnumSet;
 public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State, Event> {
     private final ScheduleService scheduleService;
     private final HelperService helperService;
+    private final StudentService studentService;
     private final EmployeeInfoService employeeInfoService;
     private final RulesService rulesService;
 
@@ -49,6 +53,22 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(sendEmployeesAction())
                 .and()
                 .withExternal()
+                .source(State.MAIN_MENU).target(State.MAIN_MENU)
+                .event(Event.REGISTER)
+                .action(registerStudentAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.MAIN_MENU)
+                .event(Event.BACK)
+                .action(sendMenuAction())
+                .and()
+                .withExternal()
+                .source(State.MAIN_MENU).target(State.ADMIN_MENU)
+                .event(Event.ADMIN_PANEL)
+                .guard(isAdminGuard())
+                .action(sendAdminMenuAction())
+                .and()
+                .withExternal()
                 .source(State.CHOOSE_EMPLOYEE).target(State.CHOOSE_EMPLOYEE)
                 .event(Event.UNKNOWN_TEXT_RECEIVED)
                 .action(sendEmployeeInfoAction())
@@ -69,7 +89,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(sendMenuAction())
                 .and()
                 .withExternal()
-                .source(State.MAIN_MENU).target(State.SEND_SCHEDULE_PHOTO)
+                .source(State.ADMIN_MENU).target(State.SEND_SCHEDULE_PHOTO)
                 .event(Event.UPDATE_SCHEDULE)
                 .action(askForPhotoAction())
                 .and()
@@ -104,9 +124,34 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     }
 
     @Bean
+    public Guard<State, Event> isAdminGuard() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            return studentService.isAdmin(Long.valueOf(userId));
+        };
+    }
+
+    @Bean
     Action<State, Event> sendMenuAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            helperService.sendMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendAdminMenuAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            helperService.sendAdminMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> registerStudentAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            studentService.addStudent(Long.valueOf(userId));
             helperService.sendMenu(userId);
         };
     }

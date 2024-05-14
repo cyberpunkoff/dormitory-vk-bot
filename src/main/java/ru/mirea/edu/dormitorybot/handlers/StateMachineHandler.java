@@ -47,14 +47,14 @@ public class StateMachineHandler implements UpdateHandler {
 
 
         stateMachine.getExtendedState().getVariables().put("message", message);
-
+        log.info("Current state machine state {}", stateMachine.getState());
         try {
             Event event = Event.getEvent(message);
             log.info("Sending event {} to state machine", event);
             var result = stateMachine.sendEvent(Mono.just(MessageBuilder.withPayload(event).build()))
                     .collectList().block().getFirst().getResultType();
             if (result != ACCEPTED) {
-                vkBotService.sendTextMessage(message.getFromId(), "Vi dodik?");
+                vkBotService.sendTextMessage(message.getFromId(), "Пожалуйста, используйте клавиатуру");
             }
             persister.persist(stateMachine, message.getFromId());
         } catch (Exception e) {

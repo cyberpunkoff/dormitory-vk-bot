@@ -21,7 +21,7 @@ public class HelperService {
             List.of(GET_SCHEDULE.toString(), GET_RULES.toString(), GET_EMPLOYEE.toString(), ADMIN_PANEL.toString())
     );
     public final static Keyboard ADMIN_MENU_KEYBOARD = VkBotService.createKeyboard(
-            List.of(UPDATE_SCHEDULE.toString(), CREATE_NEWSLETTER.toString(), EDIT_EMPLOYEE_INFO.toString())
+            List.of(UPDATE_SCHEDULE.toString(), CREATE_NEWSLETTER.toString(), EDIT_EMPLOYEE_INFO.toString(), BACK.toString())
     );
 
     private final VkBotService vkBotService;

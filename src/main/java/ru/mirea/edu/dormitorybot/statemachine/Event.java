@@ -20,7 +20,8 @@ public enum Event {
     CREATE_NEWSLETTER("Создать рассылку"),
     BACK("Назад"),
     EDIT_NEWSLETTER("Редактировать"),
-    GET_RULES("Правила общежития");
+    GET_RULES("Правила общежития"),
+    REGISTER("Начать");
 
     private final static Map<String, Event> messageToEvent = new HashMap<>();
     private String messageText;
