@@ -13,6 +13,10 @@ import org.springframework.statemachine.config.builders.StateMachineConfiguratio
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 import org.springframework.statemachine.guard.Guard;
+import org.springframework.statemachine.listener.StateMachineListener;
+import org.springframework.statemachine.listener.StateMachineListenerAdapter;
+import org.springframework.statemachine.transition.Transition;
+import ru.mirea.edu.dormitorybot.service.VkBotService;
 import ru.mirea.edu.dormitorybot.service.employee.EmployeeInfoService;
 import ru.mirea.edu.dormitorybot.service.HelperService;
 import ru.mirea.edu.dormitorybot.service.RulesService;
@@ -20,6 +24,7 @@ import ru.mirea.edu.dormitorybot.service.ScheduleService;
 import ru.mirea.edu.dormitorybot.service.student.StudentService;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 @Configuration
 @Slf4j
@@ -29,12 +34,23 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     private final ScheduleService scheduleService;
     private final HelperService helperService;
     private final StudentService studentService;
+    private final VkBotService vkBotService;
     private final EmployeeInfoService employeeInfoService;
     private final RulesService rulesService;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<State, Event> config) throws Exception {
-        config.withConfiguration().autoStartup(true);
+        config.withConfiguration().autoStartup(true).listener(listener());
+    }
+
+    private StateMachineListener<State, Event> listener() {
+
+        return new StateMachineListenerAdapter<State, Event>() {
+            @Override
+            public void eventNotAccepted(org.springframework.messaging.Message<Event> event) {
+                log.error("Not accepted event: {}", event);
+            }
+        };
     }
 
     @Override
@@ -94,6 +110,16 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(askForPhotoAction())
                 .and()
                 .withExternal()
+                .source(State.ADMIN_MENU).target(State.ADMIN_MENU)
+                .event(Event.CREATE_NEWSLETTER)
+                .action(createNewsletterAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.ADMIN_MENU)
+                .event(Event.EDIT_EMPLOYEE_INFO)
+                .action(editEmployeeInfoAction())
+                .and()
+                .withExternal()
                 .source(State.MAIN_MENU).target(State.MAIN_MENU)
                 .event(Event.GET_SCHEDULE)
                 .action(sendScheduleAction())
@@ -127,7 +153,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     public Guard<State, Event> isAdminGuard() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            return studentService.isAdmin(Long.valueOf(userId));
+            return studentService.isAdmin(userId);
         };
     }
 
@@ -148,10 +174,28 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     }
 
     @Bean
+    Action<State, Event> createNewsletterAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            vkBotService.sendTextMessage(userId, "Not implemented!");
+            // TODO add newsletter action
+        };
+    }
+
+    @Bean
+    Action<State, Event> editEmployeeInfoAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            vkBotService.sendTextMessage(userId, "Not implemented!");
+            // TODO add edit employee action
+        };
+    }
+
+    @Bean
     Action<State, Event> registerStudentAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            studentService.addStudent(Long.valueOf(userId));
+            studentService.addStudent(userId);
             helperService.sendMenu(userId);
         };
     }
