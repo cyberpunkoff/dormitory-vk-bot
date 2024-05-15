@@ -15,7 +15,7 @@ import lombok.Setter;
 public class StudentEntity {
     @Id
     @Column(name = "student_id", unique = true, nullable = false)
-    private Long studentId;
+    private Integer studentId;
 
     @Enumerated(EnumType.STRING)
     private Role role;
