@@ -27,7 +27,7 @@ public class HelperService {
     private final VkBotService vkBotService;
 
     public void sendMenu(Integer id) {
-        if (studentService.isAdmin(Long.valueOf(id))) {
+        if (studentService.isAdmin(id)) {
             vkBotService.sendTextMessageWithKeyboard(
                     id,
                     "Добро пожаловать во второе общежитие!",
