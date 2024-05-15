@@ -8,6 +8,6 @@ import ru.mirea.edu.dormitorybot.dao.entity.StudentEntity;
 import java.util.List;
 
 @Repository
-public interface StudentRepository extends JpaRepository<StudentEntity, Long> {
+public interface StudentRepository extends JpaRepository<StudentEntity, Integer> {
     List<StudentEntity> findAllByRole(Role role);
 }

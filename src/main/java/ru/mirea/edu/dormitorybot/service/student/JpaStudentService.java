@@ -17,7 +17,7 @@ public class JpaStudentService implements StudentService {
 
     @Override
     @Transactional
-    public void addStudent(Long id) {
+    public void addStudent(Integer id) {
         if (studentRepository.findById(id).isEmpty()) {
             StudentEntity student = new StudentEntity(id, Role.ROLE_USER);
             studentRepository.save(student);
@@ -26,21 +26,21 @@ public class JpaStudentService implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isAdmin(Long id) {
+    public boolean isAdmin(Integer id) {
         StudentEntity student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
         return student.getRole().equals(Role.ROLE_ADMIN) || student.getRole().equals(Role.ROLE_SUPERADMIN);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isSuperadmin(Long id) {
+    public boolean isSuperadmin(Integer id) {
         StudentEntity student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
         return student.getRole().equals(Role.ROLE_SUPERADMIN);
     }
 
     @Override
     @Transactional
-    public void makeStudentAdmin(Long id) {
+    public void makeStudentAdmin(Integer id) {
         StudentEntity student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
         student.setRole(Role.ROLE_ADMIN);
     }
@@ -48,7 +48,7 @@ public class JpaStudentService implements StudentService {
     //Для отправки сообщений, мб стоит не ставить конкретную роль
     @Override
     @Transactional(readOnly = true)
-    public List<Long> getStudents() {
+    public List<Integer> getStudents() {
         return studentRepository.findAllByRole(Role.ROLE_USER).stream().map(StudentEntity::getStudentId).toList();
     }
 }

@@ -3,13 +3,13 @@ package ru.mirea.edu.dormitorybot.service.student;
 import java.util.List;
 
 public interface StudentService {
-    void addStudent(Long id);
+    void addStudent(Integer id);
 
-    boolean isAdmin(Long id);
+    boolean isAdmin(Integer id);
 
-    boolean isSuperadmin(Long id);
+    boolean isSuperadmin(Integer id);
 
-    void makeStudentAdmin(Long id);
+    void makeStudentAdmin(Integer id);
 
-    List<Long> getStudents();
+    List<Integer> getStudents();
 }
