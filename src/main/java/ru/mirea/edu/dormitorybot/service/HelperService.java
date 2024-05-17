@@ -14,37 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HelperService {
     private final StudentService studentService;
-    public final static Keyboard MENU_KEYBOARD = VkBotService.createKeyboard(
-            List.of(GET_SCHEDULE.toString(), GET_RULES.toString(), GET_EMPLOYEE.toString())
-    );
-    public final static Keyboard MENU_KEYBOARD_FOR_ADMIN = VkBotService.createKeyboard(
-            List.of(GET_SCHEDULE.toString(), GET_RULES.toString(), GET_EMPLOYEE.toString(), ADMIN_PANEL.toString())
-    );
-    public final static Keyboard ADMIN_MENU_KEYBOARD = VkBotService.createKeyboard(
-            List.of(UPDATE_SCHEDULE.toString(), CREATE_NEWSLETTER.toString(), EDIT_EMPLOYEE_INFO.toString(), BACK.toString())
-    );
-
     private final VkBotService vkBotService;
-
-    public void sendMenu(Integer id) {
-        if (studentService.isAdmin(id)) {
-            vkBotService.sendTextMessageWithKeyboard(
-                    id,
-                    "Добро пожаловать во второе общежитие!",
-                    MENU_KEYBOARD_FOR_ADMIN
-            );
-        } else {
-            vkBotService.sendTextMessageWithKeyboard(id, "Добро пожаловать во второе общежитие!", MENU_KEYBOARD);
-        }
-    }
-
-    public void sendAdminMenu(Integer id) {
-        vkBotService.sendTextMessageWithKeyboard(
-                id,
-                "Здравствуйте, уважаемый администратор! Чем займетесь сегодня?",
-                ADMIN_MENU_KEYBOARD
-        );
-    }
 
     public void askForConfirmation(Integer id) {
         Keyboard keyboard = VkBotService.createKeyboard(List.of(Event.APPROVE.toString(), Event.CANCEL.toString()));
@@ -52,6 +22,6 @@ public class HelperService {
     }
 
     public void sendActionCanceledMessage(Integer id) {
-        vkBotService.sendTextMessageWithKeyboard(id, "Действие отменено!", MENU_KEYBOARD);
+        vkBotService.sendTextMessageWithKeyboard(id, "Действие отменено!", MenuService.MENU_KEYBOARD);
     }
 }
