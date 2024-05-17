@@ -45,10 +45,15 @@ public class StateMachineHandler implements UpdateHandler {
 
 
         stateMachine.getExtendedState().getVariables().put("message", message);
-        log.info("Current state machine state {}", stateMachine.getState());
+        org.springframework.statemachine.state.State<State, Event> state = stateMachine.getState();
+
+        log.info("Current state machine state {}", state);
         try {
             Event event = Event.getEvent(message);
             log.info("Sending event {} to state machine", event);
+            if (state.getId().equals(State.WAITING_NEWSLETTER) && event.equals(Event.UNKNOWN_TEXT_RECEIVED)) {
+                stateMachine.getExtendedState().getVariables().put("newsletter", message);
+            }
             var result = stateMachine.sendEvent(Mono.just(MessageBuilder.withPayload(event).build()))
                     .collectList().block().getFirst().getResultType();
             if (result != ACCEPTED) {

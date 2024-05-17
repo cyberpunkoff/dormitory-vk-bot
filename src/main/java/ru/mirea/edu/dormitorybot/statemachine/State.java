@@ -10,5 +10,6 @@ public enum State {
     ADD_ADMIN,
     DELETE_ADMIN,
     ADMIN_MENU,
-    EDIT_EMPLOYEE;
+    EDIT_EMPLOYEE,
+    WAITING_NEWSLETTER;
 }

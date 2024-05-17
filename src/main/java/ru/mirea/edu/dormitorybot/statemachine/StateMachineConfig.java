@@ -33,6 +33,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     private final AdminService adminService;
     private final RulesService rulesService;
     private final MenuService menuService;
+    private final NewsletterService newsLetterService;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<State, Event> config) throws Exception {
@@ -135,11 +136,38 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .event(Event.UPDATE_SCHEDULE)
                 .action(askForPhotoAction())
                 .and()
+
                 .withExternal()
-                .source(State.ADMIN_MENU).target(State.ADMIN_MENU)
+                .source(State.ADMIN_MENU).target(State.WAITING_NEWSLETTER)
                 .event(Event.CREATE_NEWSLETTER)
                 .action(createNewsletterAction())
                 .and()
+                .withExternal()
+                .source(State.WAITING_NEWSLETTER).target(State.ADMIN_MENU)
+                .event(Event.BACK)
+                .action(exitWaitingState())
+                .and()
+                .withExternal()
+                .source(State.WAITING_NEWSLETTER).target(State.APPROVE_NEWSLETTER)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(handleNewsletter())
+                .and()
+                .withExternal()
+                .source(State.APPROVE_NEWSLETTER).target(State.ADMIN_MENU)
+                .event(Event.CANCEL)
+                .action(cancelNewsletterSending())
+                .and()
+                .withExternal()
+                .source(State.APPROVE_NEWSLETTER).target(State.ADMIN_MENU)
+                .event(Event.APPROVE)
+                .action(sendNewsletter())
+                .and()
+                .withExternal()
+                .source(State.APPROVE_NEWSLETTER).target(State.WAITING_NEWSLETTER)
+                .event(Event.EDIT_NEWSLETTER)
+                .action(createNewsletterAction())
+                .and()
+
                 .withExternal()
                 .source(State.ADMIN_MENU).target(State.EDIT_EMPLOYEE)
                 .event(Event.EDIT_EMPLOYEE_INFO)
@@ -227,8 +255,45 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     Action<State, Event> createNewsletterAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            vkBotService.sendTextMessage(userId, "Not implemented!");
-            // TODO add newsletter action
+            menuService.sendBackFromStateMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> exitWaitingState() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            menuService.sendAdminMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> handleNewsletter() {
+        return context -> {
+            Message message = context.getExtendedState().get("message", Message.class);
+            Integer userId = message.getFromId();
+            log.info("newsletter: {}", message);
+            menuService.sendNewsletterMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> cancelNewsletterSending() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            menuService.sendAdminMenu(userId);
+            vkBotService.sendTextMessage(userId, "Отмена рассылки сообщения");
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendNewsletter() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            Message newsletter = context.getExtendedState().get("newsletter", Message.class);
+            newsLetterService.sendNewsLetterForEveryone(newsletter);
+            vkBotService.sendTextMessage(userId, "Сообщение отправлено всем пользователям");
+            menuService.sendAdminMenu(userId);
         };
     }
 

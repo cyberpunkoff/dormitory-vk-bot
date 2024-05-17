@@ -45,11 +45,10 @@ public class JpaStudentService implements StudentService {
         student.setRole(Role.ROLE_ADMIN);
     }
 
-    //Для отправки сообщений, мб стоит не ставить конкретную роль
     @Override
     @Transactional(readOnly = true)
     public List<Integer> getStudents() {
-        return studentRepository.findAllByRole(Role.ROLE_USER).stream().map(StudentEntity::getStudentId).toList();
+        return studentRepository.findAll().stream().map(StudentEntity::getStudentId).toList();
     }
 
     @Override
