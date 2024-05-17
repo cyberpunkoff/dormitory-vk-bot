@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
@@ -15,16 +14,11 @@ import org.springframework.statemachine.config.builders.StateMachineTransitionCo
 import org.springframework.statemachine.guard.Guard;
 import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
-import org.springframework.statemachine.transition.Transition;
-import ru.mirea.edu.dormitorybot.service.VkBotService;
+import ru.mirea.edu.dormitorybot.service.*;
 import ru.mirea.edu.dormitorybot.service.employee.EmployeeInfoService;
-import ru.mirea.edu.dormitorybot.service.HelperService;
-import ru.mirea.edu.dormitorybot.service.RulesService;
-import ru.mirea.edu.dormitorybot.service.ScheduleService;
 import ru.mirea.edu.dormitorybot.service.student.StudentService;
 
 import java.util.EnumSet;
-import java.util.Optional;
 
 @Configuration
 @Slf4j
@@ -36,7 +30,9 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     private final StudentService studentService;
     private final VkBotService vkBotService;
     private final EmployeeInfoService employeeInfoService;
+    private final AdminService adminService;
     private final RulesService rulesService;
+    private final MenuService menuService;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<State, Event> config) throws Exception {
@@ -90,6 +86,36 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(sendEmployeeInfoAction())
                 .and()
                 .withExternal()
+                .source(State.ADMIN_MENU).target(State.ADD_ADMIN)
+                .event(Event.ADD_ADMIN)
+                .action(sendAddDeleteRequestAdminInfoAction())
+                .and()
+                .withExternal()
+                .source(State.ADD_ADMIN).target(State.ADD_ADMIN)
+                .event(Event.BACK)
+                .action(sendAdminMenuAction())
+                .and()
+                .withExternal()
+                .source(State.DELETE_ADMIN).target(State.ADMIN_MENU)
+                .event(Event.BACK)
+                .action(sendAdminMenuAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.DELETE_ADMIN)
+                .event(Event.DELETE_ADMIN)
+                .action(sendAddDeleteRequestAdminInfoAction())
+                .and()
+                .withExternal()
+                .source(State.ADD_ADMIN).target(State.MAIN_MENU)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(addAdminAction())
+                .and()
+                .withExternal()
+                .source(State.DELETE_ADMIN).target(State.MAIN_MENU)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(deleteAdminAction())
+                .and()
+                .withExternal()
                 .source(State.MAIN_MENU).target(State.MAIN_MENU)
                 .event(Event.GET_RULES)
                 .action(sendRulesAction())
@@ -115,7 +141,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(createNewsletterAction())
                 .and()
                 .withExternal()
-                .source(State.ADMIN_MENU).target(State.ADMIN_MENU)
+                .source(State.ADMIN_MENU).target(State.EDIT_EMPLOYEE)
                 .event(Event.EDIT_EMPLOYEE_INFO)
                 .action(editEmployeeInfoAction())
                 .and()
@@ -161,7 +187,31 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     Action<State, Event> sendMenuAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            helperService.sendMenu(userId);
+            menuService.sendMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendAddDeleteRequestAdminInfoAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            adminService.sendRequest(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> addAdminAction() {
+        return context -> {
+            Message message = context.getExtendedState().get("message", Message.class);
+            adminService.addAdmin(message);
+        };
+    }
+
+    @Bean
+    Action<State, Event> deleteAdminAction() {
+        return context -> {
+            Message message = context.getExtendedState().get("message", Message.class);
+            adminService.deleteAdmin(message);
         };
     }
 
@@ -169,7 +219,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     Action<State, Event> sendAdminMenuAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            helperService.sendAdminMenu(userId);
+            menuService.sendAdminMenu(userId);
         };
     }
 
@@ -186,8 +236,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     Action<State, Event> editEmployeeInfoAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            vkBotService.sendTextMessage(userId, "Not implemented!");
-            // TODO add edit employee action
+            employeeInfoService.sendEmployees(userId);
         };
     }
 
@@ -196,7 +245,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
             studentService.addStudent(userId);
-            helperService.sendMenu(userId);
+            menuService.sendMenu(userId);
         };
     }
 

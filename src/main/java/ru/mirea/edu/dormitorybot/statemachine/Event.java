@@ -12,6 +12,8 @@ public enum Event {
     UPDATE_SCHEDULE("Обновить расписание"),
     EDIT_EMPLOYEE_INFO("Обновить информацию о работнике"),
     PHOTO_RECEIVED,
+    ADD_ADMIN("Добавить администратора"),
+    DELETE_ADMIN("Удалить администратора"),
     APPROVE("Подтвердить"),
     CANCEL("Отмена"),
     UNKNOWN_TEXT_RECEIVED,

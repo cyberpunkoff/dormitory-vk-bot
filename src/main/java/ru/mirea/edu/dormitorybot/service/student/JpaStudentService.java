@@ -51,4 +51,11 @@ public class JpaStudentService implements StudentService {
     public List<Integer> getStudents() {
         return studentRepository.findAllByRole(Role.ROLE_USER).stream().map(StudentEntity::getStudentId).toList();
     }
+
+    @Override
+    @Transactional
+    public void deleteAdmin(Integer id) {
+        StudentEntity student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
+        student.setRole(Role.ROLE_USER);
+    }
 }
