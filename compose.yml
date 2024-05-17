@@ -11,8 +11,8 @@ services:
     volumes:
       - 'minio_data:/data'
     environment:
-      - MINIO_ROOT_USER=EGOR
-      - MINIO_ROOT_PASSWORD=EGOR_VORONIN
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio
 
   postgresql:
     image: postgres:16
@@ -29,19 +29,20 @@ services:
 
   liquibase-migrations:
     image: liquibase/liquibase:4.25
-    depends_on:
-      - postgresql
+#    depends_on:
+#      - postgresql
     command:
       - --changelog-file=master.xml
       - --driver=org.postgresql.Driver
-      - --url=jdbc:postgresql://postgresql:5432/dormitory
+      - --url=jdbc:postgresql://localhost:5432/dormitory
       - --username=postgres
       - --password=postgres
       - update
     volumes:
       - ./migrations:/liquibase/changelog
-    networks:
-      - backend
+#    networks:
+#      - host
+    network_mode: "host"
 
 networks:
   backend: { }
