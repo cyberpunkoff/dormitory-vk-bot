@@ -1,13 +1,21 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+    ports:
+      - '8080:8080'
+    networks:
+      - backend
+
   minio:
     image: docker.io/bitnami/minio:latest
     ports:
       - '9000:9000'
       - '9001:9001'
     networks:
-      - minionetwork
+      - backend
     volumes:
       - 'minio_data:/data'
     environment:
@@ -44,8 +52,7 @@ services:
       - backend
 
 networks:
-  backend: { }
-  minionetwork:
+  backend:
     driver: bridge
 
 volumes:
