@@ -92,7 +92,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(sendAddDeleteRequestAdminInfoAction())
                 .and()
                 .withExternal()
-                .source(State.ADD_ADMIN).target(State.ADD_ADMIN)
+                .source(State.ADD_ADMIN).target(State.ADMIN_MENU)
                 .event(Event.BACK)
                 .action(sendAdminMenuAction())
                 .and()
@@ -167,7 +167,6 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .event(Event.EDIT_NEWSLETTER)
                 .action(createNewsletterAction())
                 .and()
-
                 .withExternal()
                 .source(State.ADMIN_MENU).target(State.EDIT_EMPLOYEE)
                 .event(Event.EDIT_EMPLOYEE_INFO)
@@ -232,6 +231,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
         return context -> {
             Message message = context.getExtendedState().get("message", Message.class);
             adminService.addAdmin(message);
+            menuService.sendMenu(message.getFromId());
         };
     }
 
@@ -240,6 +240,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
         return context -> {
             Message message = context.getExtendedState().get("message", Message.class);
             adminService.deleteAdmin(message);
+            menuService.sendMenu(message.getFromId());
         };
     }
 
