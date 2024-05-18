@@ -22,10 +22,40 @@ services:
       - MINIO_ROOT_USER=EGOR
       - MINIO_ROOT_PASSWORD=EGOR_VORONIN
 
+  postgresql:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: dormitory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgresql:/var/lib/postgresql/
+    networks:
+      - backend
+
+  liquibase-migrations:
+    image: liquibase/liquibase:4.25
+    depends_on:
+      - postgresql
+    command:
+      - --changelog-file=master.xml
+      - --driver=org.postgresql.Driver
+      - --url=jdbc:postgresql://postgresql:5432/dormitory
+      - --username=postgres
+      - --password=postgres
+      - update
+    volumes:
+      - ./migrations:/liquibase/changelog
+    networks:
+      - backend
+
 networks:
   backend:
     driver: bridge
 
 volumes:
+  postgresql:
   minio_data:
     driver: local

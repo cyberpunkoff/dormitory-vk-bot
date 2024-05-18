@@ -1,8 +1,9 @@
-package ru.mirea.edu.dormitorybot.service.minio;
+package ru.mirea.edu.dormitorybot.service.minio.schedule;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.mirea.edu.dormitorybot.exceptions.NoScheduleForCurrentMonthException;
+import ru.mirea.edu.dormitorybot.service.minio.MinioService;
 
 import java.io.InputStream;
 import java.time.Month;

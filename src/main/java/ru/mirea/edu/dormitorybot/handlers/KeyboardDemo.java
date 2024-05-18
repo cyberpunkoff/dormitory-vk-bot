@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import ru.mirea.edu.dormitorybot.exceptions.NoScheduleForCurrentMonthException;
-import ru.mirea.edu.dormitorybot.service.minio.ScheduleImageService;
+import ru.mirea.edu.dormitorybot.service.minio.schedule.ScheduleImageService;
 
 import java.io.InputStream;
 import java.net.URI;

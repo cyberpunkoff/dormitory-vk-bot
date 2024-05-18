@@ -6,7 +6,7 @@ import api.longpoll.bots.model.objects.media.Photo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.mirea.edu.dormitorybot.service.minio.ScheduleImageService;
+import ru.mirea.edu.dormitorybot.service.minio.schedule.ScheduleImageService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
 
 import java.io.IOException;
