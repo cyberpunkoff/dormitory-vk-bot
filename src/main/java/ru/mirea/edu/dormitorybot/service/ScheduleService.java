@@ -21,6 +21,7 @@ import java.util.List;
 public class ScheduleService {
     private final ScheduleImageService scheduleService;
     private final VkBotService vkBotService;
+    private final MenuService menuService;
 
     public void sendSchedule(Integer id) {
         try {
@@ -30,6 +31,8 @@ public class ScheduleService {
             vkBotService.sendTextMessage(id, "Нет расписания на этот месяц");
         } catch (Exception e) {
             vkBotService.sendTextMessage(id, "Не удалось получить расписание, попробуйте позднее");
+        } finally {
+            menuService.sendMenu(id);
         }
     }
 
