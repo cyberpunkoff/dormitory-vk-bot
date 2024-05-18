@@ -13,8 +13,11 @@ public class RulesService {
     private final MinioService minioService;
 
     public void sendRules(Integer id) {
-        InputStream file = minioService.getFile("schedule", "rules.pdf");
-        vkBotService.sendTextWithDocument(id, "Распорядок", file);
+        try {
+            InputStream file = minioService.getFile("schedule", "rules.pdf");
+            vkBotService.sendTextWithDocument(id, "Распорядок", file);
+        } catch (Exception ex) {
+            vkBotService.sendTextMessage(id, "Ошибка получения распорядка, попробуйте позднее");
+        }
     }
-
 }

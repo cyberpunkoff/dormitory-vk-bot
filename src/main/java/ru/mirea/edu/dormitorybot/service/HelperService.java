@@ -3,6 +3,7 @@ package ru.mirea.edu.dormitorybot.service;
 import api.longpoll.bots.model.objects.additional.Keyboard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.mirea.edu.dormitorybot.service.student.StudentService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
 import static ru.mirea.edu.dormitorybot.statemachine.Event.*;
 
@@ -12,14 +13,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HelperService {
-    public final static Keyboard MENU_KEYBOARD = VkBotService.createKeyboard(
-            List.of(GET_SCHEDULE.toString(), GET_RULES.toString(), GET_EMPLOYEE.toString(), UPDATE_SCHEDULE.toString())
-    );
+    private final StudentService studentService;
     private final VkBotService vkBotService;
-
-    public void sendMenu(Integer id) {
-        vkBotService.sendTextMessageWithKeyboard(id, "Добро пожаловать во второе общежитие!", MENU_KEYBOARD);
-    }
 
     public void askForConfirmation(Integer id) {
         Keyboard keyboard = VkBotService.createKeyboard(List.of(Event.APPROVE.toString(), Event.CANCEL.toString()));
@@ -27,6 +22,6 @@ public class HelperService {
     }
 
     public void sendActionCanceledMessage(Integer id) {
-        vkBotService.sendTextMessageWithKeyboard(id, "Действие отменено!", MENU_KEYBOARD);
+        vkBotService.sendTextMessageWithKeyboard(id, "Действие отменено!", MenuService.MENU_KEYBOARD);
     }
 }

@@ -12,4 +12,6 @@ public interface StudentService {
     void makeStudentAdmin(Integer id);
 
     List<Integer> getStudents();
+
+    void deleteAdmin(Integer newAdminId);
 }

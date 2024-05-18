@@ -18,8 +18,10 @@ public class JpaStudentService implements StudentService {
     @Override
     @Transactional
     public void addStudent(Integer id) {
-        StudentEntity student = new StudentEntity(id, Role.ROLE_USER);
-        studentRepository.save(student);
+        if (studentRepository.findById(id).isEmpty()) {
+            StudentEntity student = new StudentEntity(id, Role.ROLE_USER);
+            studentRepository.save(student);
+        }
     }
 
     @Override
@@ -48,5 +50,12 @@ public class JpaStudentService implements StudentService {
     @Transactional(readOnly = true)
     public List<Integer> getStudents() {
         return studentRepository.findAllByRole(Role.ROLE_USER).stream().map(StudentEntity::getStudentId).toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteAdmin(Integer id) {
+        StudentEntity student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
+        student.setRole(Role.ROLE_USER);
     }
 }

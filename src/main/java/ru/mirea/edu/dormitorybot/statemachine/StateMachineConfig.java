@@ -11,10 +11,12 @@ import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.guard.Guard;
+import org.springframework.statemachine.listener.StateMachineListener;
+import org.springframework.statemachine.listener.StateMachineListenerAdapter;
+import ru.mirea.edu.dormitorybot.service.*;
 import ru.mirea.edu.dormitorybot.service.employee.EmployeeInfoService;
-import ru.mirea.edu.dormitorybot.service.HelperService;
-import ru.mirea.edu.dormitorybot.service.RulesService;
-import ru.mirea.edu.dormitorybot.service.ScheduleService;
+import ru.mirea.edu.dormitorybot.service.student.StudentService;
 
 import java.util.EnumSet;
 
@@ -25,12 +27,26 @@ import java.util.EnumSet;
 public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State, Event> {
     private final ScheduleService scheduleService;
     private final HelperService helperService;
+    private final StudentService studentService;
+    private final VkBotService vkBotService;
     private final EmployeeInfoService employeeInfoService;
+    private final AdminService adminService;
     private final RulesService rulesService;
+    private final MenuService menuService;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<State, Event> config) throws Exception {
-        config.withConfiguration().autoStartup(true);
+        config.withConfiguration().autoStartup(true).listener(listener());
+    }
+
+    private StateMachineListener<State, Event> listener() {
+
+        return new StateMachineListenerAdapter<State, Event>() {
+            @Override
+            public void eventNotAccepted(org.springframework.messaging.Message<Event> event) {
+                log.error("Not accepted event: {}", event);
+            }
+        };
     }
 
     @Override
@@ -49,9 +65,55 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(sendEmployeesAction())
                 .and()
                 .withExternal()
+                .source(State.MAIN_MENU).target(State.MAIN_MENU)
+                .event(Event.REGISTER)
+                .action(registerStudentAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.MAIN_MENU)
+                .event(Event.BACK)
+                .action(sendMenuAction())
+                .and()
+                .withExternal()
+                .source(State.MAIN_MENU).target(State.ADMIN_MENU)
+                .event(Event.ADMIN_PANEL)
+                .guard(isAdminGuard())
+                .action(sendAdminMenuAction())
+                .and()
+                .withExternal()
                 .source(State.CHOOSE_EMPLOYEE).target(State.CHOOSE_EMPLOYEE)
                 .event(Event.UNKNOWN_TEXT_RECEIVED)
                 .action(sendEmployeeInfoAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.ADD_ADMIN)
+                .event(Event.ADD_ADMIN)
+                .action(sendAddDeleteRequestAdminInfoAction())
+                .and()
+                .withExternal()
+                .source(State.ADD_ADMIN).target(State.ADD_ADMIN)
+                .event(Event.BACK)
+                .action(sendAdminMenuAction())
+                .and()
+                .withExternal()
+                .source(State.DELETE_ADMIN).target(State.ADMIN_MENU)
+                .event(Event.BACK)
+                .action(sendAdminMenuAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.DELETE_ADMIN)
+                .event(Event.DELETE_ADMIN)
+                .action(sendAddDeleteRequestAdminInfoAction())
+                .and()
+                .withExternal()
+                .source(State.ADD_ADMIN).target(State.MAIN_MENU)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(addAdminAction())
+                .and()
+                .withExternal()
+                .source(State.DELETE_ADMIN).target(State.MAIN_MENU)
+                .event(Event.UNKNOWN_TEXT_RECEIVED)
+                .action(deleteAdminAction())
                 .and()
                 .withExternal()
                 .source(State.MAIN_MENU).target(State.MAIN_MENU)
@@ -69,9 +131,19 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
                 .action(sendMenuAction())
                 .and()
                 .withExternal()
-                .source(State.MAIN_MENU).target(State.SEND_SCHEDULE_PHOTO)
+                .source(State.ADMIN_MENU).target(State.SEND_SCHEDULE_PHOTO)
                 .event(Event.UPDATE_SCHEDULE)
                 .action(askForPhotoAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.ADMIN_MENU)
+                .event(Event.CREATE_NEWSLETTER)
+                .action(createNewsletterAction())
+                .and()
+                .withExternal()
+                .source(State.ADMIN_MENU).target(State.EDIT_EMPLOYEE)
+                .event(Event.EDIT_EMPLOYEE_INFO)
+                .action(editEmployeeInfoAction())
                 .and()
                 .withExternal()
                 .source(State.MAIN_MENU).target(State.MAIN_MENU)
@@ -104,10 +176,76 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
     }
 
     @Bean
+    public Guard<State, Event> isAdminGuard() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            return studentService.isAdmin(userId);
+        };
+    }
+
+    @Bean
     Action<State, Event> sendMenuAction() {
         return context -> {
             Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
-            helperService.sendMenu(userId);
+            menuService.sendMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendAddDeleteRequestAdminInfoAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            adminService.sendRequest(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> addAdminAction() {
+        return context -> {
+            Message message = context.getExtendedState().get("message", Message.class);
+            adminService.addAdmin(message);
+        };
+    }
+
+    @Bean
+    Action<State, Event> deleteAdminAction() {
+        return context -> {
+            Message message = context.getExtendedState().get("message", Message.class);
+            adminService.deleteAdmin(message);
+        };
+    }
+
+    @Bean
+    Action<State, Event> sendAdminMenuAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            menuService.sendAdminMenu(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> createNewsletterAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            vkBotService.sendTextMessage(userId, "Not implemented!");
+            // TODO add newsletter action
+        };
+    }
+
+    @Bean
+    Action<State, Event> editEmployeeInfoAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            employeeInfoService.sendEmployees(userId);
+        };
+    }
+
+    @Bean
+    Action<State, Event> registerStudentAction() {
+        return context -> {
+            Integer userId = context.getExtendedState().get("message", Message.class).getFromId();
+            studentService.addStudent(userId);
+            menuService.sendMenu(userId);
         };
     }
 

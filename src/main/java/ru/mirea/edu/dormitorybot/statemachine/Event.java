@@ -10,15 +10,20 @@ import java.util.Map;
 public enum Event {
     GET_SCHEDULE("Расписание"),
     UPDATE_SCHEDULE("Обновить расписание"),
+    EDIT_EMPLOYEE_INFO("Обновить информацию о работнике"),
     PHOTO_RECEIVED,
+    ADD_ADMIN("Добавить администратора"),
+    DELETE_ADMIN("Удалить администратора"),
     APPROVE("Подтвердить"),
     CANCEL("Отмена"),
     UNKNOWN_TEXT_RECEIVED,
+    ADMIN_PANEL("Админ-панель"),
     GET_EMPLOYEE("Сотрудники"),
     CREATE_NEWSLETTER("Создать рассылку"),
     BACK("Назад"),
     EDIT_NEWSLETTER("Редактировать"),
-    GET_RULES("Правила общежития");
+    GET_RULES("Правила общежития"),
+    REGISTER("Начать");
 
     private final static Map<String, Event> messageToEvent = new HashMap<>();
     private String messageText;

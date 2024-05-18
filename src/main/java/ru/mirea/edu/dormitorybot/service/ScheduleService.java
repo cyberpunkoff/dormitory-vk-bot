@@ -6,6 +6,7 @@ import api.longpoll.bots.model.objects.media.Photo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.mirea.edu.dormitorybot.exceptions.NoScheduleForCurrentMonthException;
 import ru.mirea.edu.dormitorybot.service.minio.schedule.ScheduleImageService;
 import ru.mirea.edu.dormitorybot.statemachine.Event;
 
@@ -25,6 +26,8 @@ public class ScheduleService {
         try {
             InputStream scheduleInputStream = scheduleService.getSchedule();
             vkBotService.sendTextWithImage(id, "Расписание", scheduleInputStream);
+        } catch (NoScheduleForCurrentMonthException ex) {
+            vkBotService.sendTextMessage(id, "Нет расписания на этот месяц");
         } catch (Exception e) {
             vkBotService.sendTextMessage(id, "Не удалось получить расписание, попробуйте позднее");
         }
@@ -33,7 +36,7 @@ public class ScheduleService {
     public void updateSchedule(Integer id, String photoUrl) {
         try (InputStream photoStream = URI.create(photoUrl).toURL().openStream()) {
             scheduleService.updateSchedule(photoStream);
-            vkBotService.sendTextMessageWithKeyboard(id, "Расписание обновлено!", HelperService.MENU_KEYBOARD);
+            vkBotService.sendTextMessageWithKeyboard(id, "Расписание обновлено!", MenuService.MENU_KEYBOARD);
         } catch (IOException e) {
             log.error("Error updating photo! {}", e.getMessage());
         }
